@@ -17,6 +17,7 @@ import { useRouter } from 'next/navigation'
 import { UserSubscriptionContext } from '@/app/(context)/UserSubscriptionContext'
 import { UpdateCreditUsageContext } from '@/app/(context)/UpdateCreditUsageContext'
 import { useUser } from '@clerk/nextjs'
+import { logAnalyticsEvent } from '@/utils/db';
 
 interface PROPS {
     params: {
@@ -51,6 +52,16 @@ function CreateNewContent(props: PROPS) {
         const result = await chatSession.sendMessage(FinalAIPrompt);
         
         setAiOutput(result?.response.text());
+        // Log analytics event for caption/content generation
+        await logAnalyticsEvent({
+            userId: user?.id || user?.primaryEmailAddress?.emailAddress || null,
+            eventType: 'caption_generated',
+            metadata: {
+                template: selectedTemplate?.slug,
+                prompt: formData,
+                aiResponse: result?.response.text(),
+            },
+        });
         await SaveInDb(JSON.stringify(formData), selectedTemplate?.slug, result?.response.text());
         setLoading(false);
         

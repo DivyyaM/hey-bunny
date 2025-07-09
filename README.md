@@ -1,40 +1,70 @@
 # hey-bunny
 
-## AI Content Generator App 
+## AI Content Generator App
 
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+HeyBunny is a modern AI-powered content generator built with Next.js, featuring:
+- User analytics & dashboard for product insights
+- A/B testing for feature validation
+- Custom ML/NLP keyword extraction
+- Clean, humanized code and architecture
 
-## Getting Started
+---
+
+## 🏗️ Architecture Overview
+
+- **Frontend:** Next.js (React), Tailwind CSS
+- **Backend:** Next.js API routes, Drizzle ORM (Postgres)
+- **Auth:** Clerk
+- **Analytics:** Custom event logging (logins, caption generation, post publishing)
+- **A/B Testing:** Simple group assignment (localStorage)
+- **ML/NLP:** JS-based keyword extraction using [compromise](https://github.com/spencermountain/compromise)
+- **ML Training Placeholder:** See `ml_training/README.md` for custom model work
+
+---
+
+## 📊 Analytics & Dashboard
+- All key user actions are logged to a simple analytics table.
+- View product insights at `/dashboard/analytics` (logins, captions, posts by day).
+
+## 🧪 A/B Testing
+- Users are randomly assigned to group A or B on first login.
+- Each group sees a different welcome message and button on the dashboard.
+- All group assignments and button clicks are logged for analysis.
+
+## 🤖 ML/NLP Features
+- After generating a caption, HeyBunny extracts and displays top keywords using the open-source `compromise` library.
+- Placeholder for custom ML model training in `ml_training/`.
+
+---
+
+## 🚀 Getting Started
 
 First, run the development server:
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) with your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## 🛠️ Deployment
 
-## Learn More
+- **Local:**
+  - Requires Node.js, Postgres, and environment variables (see `.env.example` if present)
+  - `npm install && npm run dev`
+- **Production:**
+  - Deploy on [Vercel](https://vercel.com/) or your preferred platform
+  - Set up environment variables and database connection
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📂 Feature Highlights
+- Analytics, A/B testing, and ML/NLP are implemented simply and can be extended easily.
+- See `ml_training/README.md` for how to add your own ML scripts or notebooks.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+*For questions or contributions, open an issue or PR!*

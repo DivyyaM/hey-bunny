@@ -5,6 +5,8 @@ import { chatSession } from '@/utils/AiModal'
 import axios from "axios"
 import Image from "next/image"
 import { useRouter } from 'next/navigation'
+import { logAnalyticsEvent } from '@/utils/db';
+import nlp from 'compromise';
 
 export default function PostGenerator() {
   const [prompt, setPrompt] = useState("")
@@ -12,6 +14,7 @@ export default function PostGenerator() {
   const [images, setImages] = useState<string[]>([])
   const [caption, setCaption] = useState("")
   const [selectedImage, setSelectedImage] = useState("")
+  const [keywords, setKeywords] = useState<string[]>([]);
   const router = useRouter();
 
   
@@ -39,6 +42,23 @@ export default function PostGenerator() {
       const result = await chatSession.sendMessage(FinalAIPrompt)
 
       setCaption(result?.response.text())
+      // Log analytics event for caption generation
+      await logAnalyticsEvent({
+        eventType: 'caption_generated',
+        metadata: {
+          prompt,
+          aiResponse: result?.response.text(),
+        },
+      });
+      // --- NLP: Extract keywords from the caption ---
+      if (result?.response.text()) {
+        const doc = nlp(result.response.text());
+        // Get top nouns as keywords
+        const nouns = doc.nouns().out('array');
+        setKeywords(nouns.slice(0, 5));
+      } else {
+        setKeywords([]);
+      }
     } catch (error) {
       console.error("Error fetching images or caption:", error)
     } finally {
@@ -126,6 +146,12 @@ export default function PostGenerator() {
                 >
                   Copy
                 </button>
+                {/* --- NLP: Show extracted keywords --- */}
+                {keywords.length > 0 && (
+                  <div className="mt-2 text-sm text-gray-400">
+                    <span className="font-semibold text-white">Keywords:</span> {keywords.join(', ')}
+                  </div>
+                )}
               </div>
             ) : (
               <div className="text-center text-gray-500">Generated caption will appear here</div>

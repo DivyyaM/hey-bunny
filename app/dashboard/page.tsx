@@ -11,6 +11,7 @@ import { useUser } from '@clerk/nextjs';
 import confetti from "canvas-confetti" // Import confetti
 import SearchSection from "./_components/SearchSection"
 import TemplateListSection from "./_components/TemplateListSection"
+import { logAnalyticsEvent } from '@/utils/db';
 
 export default function Dashboard() {
   const { user } = useUser() // Access the logged-in user's data
@@ -18,6 +19,7 @@ export default function Dashboard() {
   const [showPopup, setShowPopup] = useState<boolean>(false)
   const [showNewContent, setShowNewContent] = useState<boolean>(false)
   const videoRef = useRef<HTMLVideoElement>(null)
+  const [abGroup, setAbGroup] = useState<'A' | 'B' | null>(null);
 
   // Use typewriter hook to dynamically generate the text with added color
   const [text] = useTypewriter({
@@ -91,6 +93,38 @@ export default function Dashboard() {
     }
   }, [])
 
+  useEffect(() => {
+    if (user) {
+      // Log analytics event for login
+      logAnalyticsEvent({
+        userId: user.id || user.primaryEmailAddress?.emailAddress || null,
+        eventType: 'login',
+        metadata: {
+          name: user.fullName,
+          email: user.primaryEmailAddress?.emailAddress,
+        },
+      });
+    }
+  }, [user]);
+
+  // Assign A/B group on first visit
+  useEffect(() => {
+    let group = localStorage.getItem('abGroup') as 'A' | 'B' | null;
+    if (!group) {
+      group = Math.random() < 0.5 ? 'A' : 'B';
+      localStorage.setItem('abGroup', group);
+    }
+    setAbGroup(group);
+    if (user && group) {
+      // Log group assignment
+      logAnalyticsEvent({
+        userId: user.id || user.primaryEmailAddress?.emailAddress || null,
+        eventType: 'ab_group_assigned',
+        metadata: { group },
+      });
+    }
+  }, [user]);
+
   const handleClosePopup = () => {
     setShowPopup(false)
     setShowNewContent(false)
@@ -98,6 +132,16 @@ export default function Dashboard() {
       videoRef.current.pause()
     }
   }
+
+  // Example: log button click for A/B test
+  const handleAbButtonClick = () => {
+    logAnalyticsEvent({
+      userId: user?.id || user?.primaryEmailAddress?.emailAddress || null,
+      eventType: 'ab_button_clicked',
+      metadata: { group: abGroup },
+    });
+    alert(`You clicked the ${abGroup === 'A' ? 'classic' : 'new'} button!`);
+  };
 
   return (
     <div className="relative min-h-screen">
@@ -178,6 +222,30 @@ export default function Dashboard() {
       <div className={showPopup ? "filter blur-sm pointer-events-none" : ""}>
         <SearchSection onSearchInput={(value: string) => setUserSearchInput(value)} />
         <TemplateListSection userSearchInput={userSearchInput} />
+      </div>
+
+      <div className="p-6">
+        {abGroup === 'A' ? (
+          <>
+            <h2 className="text-2xl font-bold text-white mb-2">Welcome to Bunny (Classic)!</h2>
+            <button
+              className="px-6 py-2 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition"
+              onClick={handleAbButtonClick}
+            >
+              Classic Button
+            </button>
+          </>
+        ) : abGroup === 'B' ? (
+          <>
+            <h2 className="text-2xl font-bold text-pink-400 mb-2">Welcome to Bunny (New Experience)!</h2>
+            <button
+              className="px-6 py-2 bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500 text-white rounded-full shadow-lg hover:scale-105 transition"
+              onClick={handleAbButtonClick}
+            >
+              ✨ New Button ✨
+            </button>
+          </>
+        ) : null}
       </div>
     </div>
   )

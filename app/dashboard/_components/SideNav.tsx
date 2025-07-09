@@ -30,6 +30,11 @@ function SideNav() {
             icon:Settings,
             path:'/dashboard/settings'
         },
+        {
+            name:'Analytics',
+            icon:Home, // You can swap for a chart icon if you have one
+            path:'/dashboard/analytics'
+        },
 
     ]
 
