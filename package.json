@@ -21,6 +21,7 @@
     "canvas-confetti": "^1.9.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "compromise": "^14.14.4",
     "drizzle-orm": "^0.31.2",
     "framer-motion": "^11.18.2",
     "lucide-react": "^0.395.0",
