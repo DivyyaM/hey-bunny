@@ -1,12 +1,13 @@
 'use client'
 
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { chatSession } from '@/utils/AiModal'
 import axios from "axios"
 import Image from "next/image"
 import { useRouter } from 'next/navigation'
 import { logAnalyticsEvent } from '@/utils/db';
 import nlp from 'compromise';
+import { pipeline } from '@xenova/transformers';
 
 export default function PostGenerator() {
   const [prompt, setPrompt] = useState("")
@@ -15,6 +16,61 @@ export default function PostGenerator() {
   const [caption, setCaption] = useState("")
   const [selectedImage, setSelectedImage] = useState("")
   const [keywords, setKeywords] = useState<string[]>([]);
+  const [transformerKeywords, setTransformerKeywords] = useState<string[]>([]);
+  const [transformerLoading, setTransformerLoading] = useState(false);
+  const [rewriteStyle, setRewriteStyle] = useState<'casual' | 'seo' | 'professional'>('casual');
+  const [rewrittenCaption, setRewrittenCaption] = useState('');
+  const [rewriting, setRewriting] = useState(false);
+  const [engagement, setEngagement] = useState<string>('');
+  const [tags, setTags] = useState<string[]>([]);
+  const [emojis, setEmojis] = useState<string[]>([]);
+  const [captionFeedback, setCaptionFeedback] = useState<{ up: number; down: number }>({ up: 0, down: 0 });
+  const [rewriteFeedback, setRewriteFeedback] = useState<{ up: number; down: number }>({ up: 0, down: 0 });
+  const [sentiment, setSentiment] = useState<string>('');
+  const [sentimentLoading, setSentimentLoading] = useState(false);
+  const [captionHistory, setCaptionHistory] = useState<{ text: string; embedding: number[] }[]>([]);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<{ text: string; score: number }[]>([]);
+  const [embeddingLoading, setEmbeddingLoading] = useState(false);
+  const [mlTags, setMlTags] = useState<string[]>([]);
+  const [mlTagLoading, setMlTagLoading] = useState(false);
+  const [userLabels, setUserLabels] = useState('');
+  const [userZsResults, setUserZsResults] = useState<{ label: string; score: number }[]>([]);
+  const [userZsLoading, setUserZsLoading] = useState(false);
+  const candidateLabels = [
+    'Food', 'Fitness', 'Travel', 'Fashion', 'Tech', 'Nature', 'Art', 'Music', 'Sports', 'Love', 'Business', 'Education', 'Health', 'Finance', 'Entertainment', 'Science', 'Politics', 'History', 'Animals', 'DIY'
+  ];
+  const [summary, setSummary] = useState('');
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [toxicity, setToxicity] = useState('');
+  const [toxicityLoading, setToxicityLoading] = useState(false);
+
+  // Simple tag and emoji mapping
+  const TAG_EMOJI_MAP: Record<string, string[]> = {
+    Food: ['🍔', '🍕', '🍟'],
+    Fitness: ['💪', '🏋️‍♂️', '🏃‍♂️'],
+    Travel: ['✈️', '🌍', '🏝️'],
+    Fashion: ['👗', '👠', '🕶️'],
+    Tech: ['💻', '📱', '🤖'],
+    Nature: ['🌳', '🌸', '🌞'],
+    Art: ['🎨', '🖌️', '🖼️'],
+    Music: ['🎵', '🎸', '🎤'],
+    Sports: ['⚽', '🏀', '🏈'],
+    Love: ['❤️', '😍', '😘'],
+  };
+  const TAG_KEYWORDS: Record<string, string[]> = {
+    Food: ['food', 'pizza', 'burger', 'recipe', 'eat', 'cooking'],
+    Fitness: ['fitness', 'workout', 'gym', 'run', 'exercise', 'health'],
+    Travel: ['travel', 'trip', 'vacation', 'explore', 'adventure', 'journey'],
+    Fashion: ['fashion', 'style', 'outfit', 'clothes', 'trend'],
+    Tech: ['tech', 'gadget', 'app', 'software', 'device', 'ai', 'robot'],
+    Nature: ['nature', 'tree', 'flower', 'sun', 'mountain', 'beach'],
+    Art: ['art', 'painting', 'draw', 'gallery', 'artist'],
+    Music: ['music', 'song', 'band', 'guitar', 'sing'],
+    Sports: ['sport', 'game', 'soccer', 'basketball', 'football'],
+    Love: ['love', 'romance', 'date', 'heart', 'crush'],
+  };
+
   const router = useRouter();
 
   
@@ -85,6 +141,263 @@ export default function PostGenerator() {
     router.push(`/publish-post?url=${selectedImage}&caption=${caption}`);
   }
 
+  // Handler for transformer-based keyword extraction
+  const handleTransformerKeywordExtraction = async () => {
+    if (!caption) return;
+    setTransformerLoading(true);
+    try {
+      // Load NER pipeline (runs in-browser)
+      const ner = await pipeline('ner', 'Xenova/bert-base-NER');
+      const result = await ner(caption);
+      // Extract unique entities as keywords
+      const unique = Array.from(new Set(result.map((ent: any) => ent.word.replace(/^##/, ''))));
+      setTransformerKeywords(unique);
+    } catch (err) {
+      setTransformerKeywords(['Error extracting keywords']);
+    }
+    setTransformerLoading(false);
+  };
+
+  // Simple rules-based rewriter for demo
+  function rewriteCaption(text: string, style: 'casual' | 'seo' | 'professional') {
+    if (!text) return '';
+    if (style === 'casual') {
+      return text + ' 😎✨';
+    } else if (style === 'seo') {
+      return text + ' | Boost your reach with #trending #viral #mustsee';
+    } else if (style === 'professional') {
+      return 'Professional: ' + text.replace(/!+/g, '.') + ' Connect with us for more insights.';
+    }
+    return text;
+  }
+
+  const handleRewrite = () => {
+    setRewriting(true);
+    setTimeout(() => {
+      setRewrittenCaption(rewriteCaption(caption, rewriteStyle));
+      setRewriting(false);
+    }, 400); // Simulate async
+  };
+
+  // Simple engagement predictor
+  function predictEngagement(text: string, keywords: string[]) {
+    if (!text) return '';
+    let score = 0;
+    if (text.length > 100) score += 1;
+    if (keywords.length > 3) score += 1;
+    if (/[\u263a-\u2764\u1F600-\u1F64F]/.test(text)) score += 1; // Emoji presence (broad unicode range)
+    if (score === 0) return 'Low';
+    if (score === 1) return 'Medium';
+    return 'High';
+  }
+
+  // Update engagement when caption or keywords change
+  useEffect(() => {
+    setEngagement(predictEngagement(caption, keywords));
+  }, [caption, keywords]);
+
+  // Tag and emoji assignment
+  useEffect(() => {
+    if (!caption) {
+      setTags([]);
+      setEmojis([]);
+      return;
+    }
+    const foundTags: string[] = [];
+    const foundEmojis: string[] = [];
+    const lower = caption.toLowerCase();
+    Object.entries(TAG_KEYWORDS).forEach(([tag, keywords]) => {
+      if (keywords.some(word => lower.includes(word))) {
+        foundTags.push(tag);
+        foundEmojis.push(...(TAG_EMOJI_MAP[tag] || []));
+      }
+    });
+    setTags(foundTags.slice(0, 2));
+    setEmojis(foundEmojis.slice(0, 3));
+  }, [caption]);
+
+  // Load feedback from localStorage on mount
+  useEffect(() => {
+    const cap = localStorage.getItem('captionFeedback');
+    const rew = localStorage.getItem('rewriteFeedback');
+    if (cap) setCaptionFeedback(JSON.parse(cap));
+    if (rew) setRewriteFeedback(JSON.parse(rew));
+  }, []);
+
+  // Save feedback to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('captionFeedback', JSON.stringify(captionFeedback));
+  }, [captionFeedback]);
+  useEffect(() => {
+    localStorage.setItem('rewriteFeedback', JSON.stringify(rewriteFeedback));
+  }, [rewriteFeedback]);
+
+  const handleCaptionFeedback = (type: 'up' | 'down') => {
+    setCaptionFeedback(fb => ({ ...fb, [type]: fb[type] + 1 }));
+  };
+  const handleRewriteFeedback = (type: 'up' | 'down') => {
+    setRewriteFeedback(fb => ({ ...fb, [type]: fb[type] + 1 }));
+  };
+
+  const handleSentiment = async () => {
+    if (!caption) return;
+    setSentimentLoading(true);
+    setSentiment('');
+    try {
+      // Load sentiment analysis pipeline (runs in-browser)
+      const classifier = await pipeline('sentiment-analysis', 'Xenova/distilbert-base-uncased-finetuned-sst-2-english');
+      const result = await classifier(caption);
+      if (result && result[0]) {
+        // Handle both possible output shapes
+        const label = (result[0] as any).label || (Array.isArray(result[0]) && result[0][0]?.label);
+        setSentiment(label || 'Unknown');
+      } else {
+        setSentiment('Unknown');
+      }
+    } catch {
+      setSentiment('Error');
+    }
+    setSentimentLoading(false);
+  };
+
+  // Helper: Cosine similarity
+  function cosineSimilarity(a: number[], b: number[]) {
+    const dot = a.reduce((sum, ai, i) => sum + ai * b[i], 0);
+    const normA = Math.sqrt(a.reduce((sum, ai) => sum + ai * ai, 0));
+    const normB = Math.sqrt(b.reduce((sum, bi) => sum + bi * bi, 0));
+    return dot / (normA * normB);
+  }
+
+  // On caption generation, compute and store embedding
+  const handleStoreCaption = async (text: string) => {
+    setEmbeddingLoading(true);
+    try {
+      const embedder = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
+      const output = await embedder(text, { pooling: 'mean', normalize: true });
+      const embedding = Array.from(output.data);
+      setCaptionHistory(hist => [...hist, { text, embedding }]);
+      localStorage.setItem('captionHistory', JSON.stringify([...captionHistory, { text, embedding }]));
+    } catch {
+      setCaptionHistory(hist => [...hist, { text, embedding: [] }]);
+    }
+    setEmbeddingLoading(false);
+  };
+  // Load caption history from localStorage on mount
+  useEffect(() => {
+    const hist = localStorage.getItem('captionHistory');
+    if (hist) setCaptionHistory(JSON.parse(hist));
+  }, []);
+  // When a new caption is generated, store it and its embedding
+  useEffect(() => {
+    if (caption && !captionHistory.some(h => h.text === caption)) {
+      handleStoreCaption(caption);
+    }
+    // eslint-disable-next-line
+  }, [caption]);
+  // Semantic search
+  const handleSemanticSearch = async () => {
+    if (!searchQuery) return setSearchResults([]);
+    setEmbeddingLoading(true);
+    try {
+      const embedder = await pipeline('feature-extraction', 'Xenova/all-MiniLM-L6-v2');
+      const output = await embedder(searchQuery, { pooling: 'mean', normalize: true });
+      const queryEmbedding = Array.from(output.data);
+      const results = captionHistory
+        .map(h => ({ text: h.text, score: cosineSimilarity(queryEmbedding, h.embedding) }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 3);
+      setSearchResults(results);
+    } catch {
+      setSearchResults([]);
+    }
+    setEmbeddingLoading(false);
+  };
+
+  const handleMultiLabel = async () => {
+    if (!caption) return;
+    setMlTagLoading(true);
+    setMlTags([]);
+    try {
+      // Use zero-shot classification pipeline
+      const classifier = await pipeline('zero-shot-classification', 'Xenova/joeddav-xlm-roberta-large-xnli');
+      const result = await classifier(caption, candidateLabels);
+      let labels: string[] = [];
+      if (Array.isArray(result)) {
+        labels = result[0]?.labels || [];
+      } else if (result && typeof result === 'object' && 'labels' in result) {
+        labels = (result as any).labels;
+      }
+      setMlTags(labels.slice(0, 3));
+    } catch {
+      setMlTags(['Error']);
+    }
+    setMlTagLoading(false);
+  };
+
+  const handleUserZeroShot = async () => {
+    if (!caption || !userLabels.trim()) return;
+    setUserZsLoading(true);
+    setUserZsResults([]);
+    try {
+      const labels = userLabels.split(',').map(l => l.trim()).filter(Boolean);
+      if (labels.length === 0) return;
+      const classifier = await pipeline('zero-shot-classification', 'Xenova/joeddav-xlm-roberta-large-xnli');
+      const result = await classifier(caption, labels);
+      let zs: { label: string; score: number }[] = [];
+      if (Array.isArray(result)) {
+        zs = (result[0]?.labels || []).map((label: string, i: number) => ({ label, score: result[0]?.scores?.[i] ?? 0 }));
+      } else if (result && typeof result === 'object' && 'labels' in result && 'scores' in result) {
+        zs = (result as any).labels.map((label: string, i: number) => ({ label, score: (result as any).scores[i] }));
+      }
+      setUserZsResults(zs);
+    } catch {
+      setUserZsResults([{ label: 'Error', score: 0 }]);
+    }
+    setUserZsLoading(false);
+  };
+
+  const handleSummarize = async () => {
+    if (!caption) return;
+    setSummaryLoading(true);
+    setSummary('');
+    try {
+      // Use T5-small for summarization
+      const summarizer = await pipeline('summarization', 'Xenova/t5-small');
+      const result = await summarizer(caption);
+      let sum = '';
+      if (Array.isArray(result)) {
+        sum = (result[0] as any)['summary_text'] || (result[0] as any)['generated_text'] || '';
+      } else if (result && typeof result === 'object') {
+        sum = (result as any)['summary_text'] || (result as any)['generated_text'] || '';
+      }
+      setSummary(sum);
+    } catch {
+      setSummary('Error');
+    }
+    setSummaryLoading(false);
+  };
+
+  const handleToxicity = async () => {
+    if (!caption) return;
+    setToxicityLoading(true);
+    setToxicity('');
+    try {
+      // Use a multi-label emotion model as a proxy for toxicity (e.g., go-emotions)
+      const classifier = await pipeline('text-classification', 'Xenova/roberta-base-go-emotions');
+      const result = await classifier(caption, { topk: 5 });
+      let toxic = false;
+      if (Array.isArray(result)) {
+        toxic = result.some((r: any) =>
+          ['anger', 'disgust', 'hate', 'offensive', 'threat'].some(label => (r.label || '').toLowerCase().includes(label))
+        );
+      }
+      setToxicity(toxic ? 'Toxic' : 'Safe');
+    } catch {
+      setToxicity('Error');
+    }
+    setToxicityLoading(false);
+  };
+
   return (
     <div className="min-h-screen bg-black text-white flex flex-col items-center justify-center p-4 space-y-8">
       <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 animate-pulse mb-8">
@@ -140,18 +453,169 @@ export default function PostGenerator() {
                   onChange={handleCaptionChange}
                   rows={3}
                 />
+                {/* --- Engagement Prediction --- */}
+                {engagement && (
+                  <div className={`text-sm font-semibold mt-1 ${engagement === 'High' ? 'text-green-400' : engagement === 'Medium' ? 'text-yellow-400' : 'text-red-400'}`}>
+                    Engagement: {engagement}
+                  </div>
+                )}
+                {/* --- Tagging & Emoji Generation --- */}
+                {(tags.length > 0 || emojis.length > 0) && (
+                  <div className="mt-2 flex items-center gap-4">
+                    {tags.length > 0 && (
+                      <span className="text-sm text-blue-300">Tags: {tags.join(', ')}</span>
+                    )}
+                    {emojis.length > 0 && (
+                      <span className="text-xl">{emojis.join(' ')}</span>
+                    )}
+                  </div>
+                )}
                 <button
                   onClick={handleCopyCaption}
                   className="px-4 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded-md font-semibold text-sm transition-all duration-300 ease-in-out"
                 >
                   Copy
                 </button>
-                {/* --- NLP: Show extracted keywords --- */}
+                {/* --- NLP: Show compromise keywords --- */}
                 {keywords.length > 0 && (
                   <div className="mt-2 text-sm text-gray-400">
-                    <span className="font-semibold text-white">Keywords:</span> {keywords.join(', ')}
+                    <span className="font-semibold text-white">Keywords (compromise):</span> {keywords.join(', ')}
                   </div>
                 )}
+                {/* --- Transformer-based keyword extraction --- */}
+                <div className="mt-2">
+                  <button
+                    onClick={handleTransformerKeywordExtraction}
+                    className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded text-xs mr-2"
+                    disabled={transformerLoading}
+                  >
+                    {transformerLoading ? 'Extracting...' : 'Extract Keywords (Transformer)'}
+                  </button>
+                  {transformerKeywords.length > 0 && (
+                    <div className="text-xs text-gray-400 mt-1">
+                      <span className="font-semibold text-white">Keywords (BERT):</span> {transformerKeywords.join(', ')}
+                    </div>
+                  )}
+                </div>
+                {/* --- Caption Rewriting --- */}
+                <div className="mt-4 flex items-center gap-2">
+                  <label htmlFor="rewrite-style" className="text-sm text-gray-300">Rewrite style:</label>
+                  <select
+                    id="rewrite-style"
+                    value={rewriteStyle}
+                    onChange={e => setRewriteStyle(e.target.value as any)}
+                    className="bg-[#222] text-white rounded px-2 py-1 text-sm"
+                  >
+                    <option value="casual">Casual</option>
+                    <option value="seo">SEO</option>
+                    <option value="professional">Professional</option>
+                  </select>
+                  <button
+                    onClick={handleRewrite}
+                    className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs"
+                    disabled={rewriting}
+                  >
+                    {rewriting ? 'Rewriting...' : 'Rewrite Caption'}
+                  </button>
+                </div>
+                {rewrittenCaption && (
+                  <div className="mt-2 text-sm text-yellow-300">
+                    <span className="font-semibold">Rewritten:</span> {rewrittenCaption}
+                  </div>
+                )}
+                {/* --- Sentiment Analysis --- */}
+                <div className="mt-2 flex items-center gap-2">
+                  <button
+                    onClick={handleSentiment}
+                    className="px-3 py-1 bg-pink-600 hover:bg-pink-700 text-white rounded text-xs"
+                    disabled={sentimentLoading}
+                  >
+                    {sentimentLoading ? 'Checking...' : 'Check Sentiment'}
+                  </button>
+                  {sentiment && (
+                    <span className={`text-sm font-semibold ${sentiment === 'POSITIVE' ? 'text-green-400' : sentiment === 'NEGATIVE' ? 'text-red-400' : 'text-gray-300'}`}>Sentiment: {sentiment}</span>
+                  )}
+                </div>
+                {/* --- Toxicity Detection --- */}
+                <div className="mt-2 flex items-center gap-2">
+                  <button
+                    onClick={handleToxicity}
+                    className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs"
+                    disabled={toxicityLoading}
+                  >
+                    {toxicityLoading ? 'Checking...' : 'Check Toxicity'}
+                  </button>
+                  {toxicity && (
+                    <span className={`text-sm font-semibold ${toxicity === 'Toxic' ? 'text-red-400' : 'text-green-400'}`}>{toxicity === 'Toxic' ? '⚠️ Toxic' : '✅ Safe'}</span>
+                  )}
+                </div>
+                {/* --- Feedback Loop --- */}
+                <div className="mt-4 flex items-center gap-6">
+                  <div className="flex items-center gap-2">
+                    <button onClick={() => handleCaptionFeedback('up')} className="text-green-400 text-xl">👍</button>
+                    <button onClick={() => handleCaptionFeedback('down')} className="text-red-400 text-xl">👎</button>
+                    <span className="text-xs text-gray-400">{captionFeedback.up} 👍 / {captionFeedback.down} 👎</span>
+                  </div>
+                  {rewrittenCaption && (
+                    <div className="flex items-center gap-2">
+                      <button onClick={() => handleRewriteFeedback('up')} className="text-green-400 text-xl">👍</button>
+                      <button onClick={() => handleRewriteFeedback('down')} className="text-red-400 text-xl">👎</button>
+                      <span className="text-xs text-gray-400">{rewriteFeedback.up} 👍 / {rewriteFeedback.down} 👎</span>
+                    </div>
+                  )}
+                </div>
+                {/* --- Multi-Label Classification (Zero-Shot) --- */}
+                <div className="mt-2 flex items-center gap-2">
+                  <button
+                    onClick={handleMultiLabel}
+                    className="px-3 py-1 bg-orange-600 hover:bg-orange-700 text-white rounded text-xs"
+                    disabled={mlTagLoading}
+                  >
+                    {mlTagLoading ? 'Classifying...' : 'Classify Tags (ML)'}
+                  </button>
+                  {mlTags.length > 0 && (
+                    <span className="text-sm text-orange-300">ML Tags: {mlTags.join(', ')}</span>
+                  )}
+                </div>
+                {/* --- Zero-Shot User-Defined Classification --- */}
+                <div className="mt-2 flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={userLabels}
+                      onChange={e => setUserLabels(e.target.value)}
+                      placeholder="Enter categories (comma-separated)"
+                      className="bg-[#222] text-white rounded px-2 py-1 text-xs w-64"
+                    />
+                    <button
+                      onClick={handleUserZeroShot}
+                      className="px-3 py-1 bg-cyan-600 hover:bg-cyan-700 text-white rounded text-xs"
+                      disabled={userZsLoading}
+                    >
+                      {userZsLoading ? 'Classifying...' : 'Classify (Your Tags)'}
+                    </button>
+                  </div>
+                  {userZsResults.length > 0 && (
+                    <div className="text-xs text-cyan-300 mt-1">
+                      {userZsResults.map((r, i) => (
+                        <div key={i}>{r.label}: {(r.score * 100).toFixed(1)}%</div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                {/* --- Summarization --- */}
+                <div className="mt-2 flex items-center gap-2">
+                  <button
+                    onClick={handleSummarize}
+                    className="px-3 py-1 bg-yellow-600 hover:bg-yellow-700 text-white rounded text-xs"
+                    disabled={summaryLoading}
+                  >
+                    {summaryLoading ? 'Summarizing...' : 'Summarize'}
+                  </button>
+                  {summary && (
+                    <span className="text-sm text-yellow-300">Summary: {summary}</span>
+                  )}
+                </div>
               </div>
             ) : (
               <div className="text-center text-gray-500">Generated caption will appear here</div>
@@ -202,6 +666,36 @@ export default function PostGenerator() {
       >
         Create Post
       </button>
+      {/* --- Semantic Search --- */}
+      <div className="mt-8 mb-4">
+        <h3 className="text-lg font-semibold text-white mb-2">🔍 Semantic Search (MiniLM)</h3>
+        <div className="flex gap-2 items-center">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            placeholder="Search captions by meaning..."
+            className="bg-[#222] text-white rounded px-2 py-1 text-sm w-64"
+          />
+          <button
+            onClick={handleSemanticSearch}
+            className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs"
+            disabled={embeddingLoading}
+          >
+            {embeddingLoading ? 'Searching...' : 'Search'}
+          </button>
+        </div>
+        {searchResults.length > 0 && (
+          <div className="mt-2 text-sm text-gray-300">
+            <span className="font-semibold text-white">Related Captions:</span>
+            <ul className="list-disc ml-6 mt-1">
+              {searchResults.map((r, i) => (
+                <li key={i}>{r.text} <span className="text-xs text-gray-500">(score: {r.score.toFixed(2)})</span></li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
     </div>
   )
 }
