@@ -22,6 +22,10 @@ const nextConfig = {
             config.externals = config.externals || [];
             config.externals.push('onnxruntime-node');
         }
+        if (isServer) {
+            config.externals = config.externals || [];
+            config.externals.push('@xenova/transformers');
+        }
         
         return config;
     },
