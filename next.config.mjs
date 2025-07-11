@@ -7,7 +7,24 @@ const nextConfig = {
     },
     eslint: {
         ignoreDuringBuilds: true,
-      },
+    },
+    webpack: (config, { isServer }) => {
+        // Exclude native modules from client-side bundle
+        if (!isServer) {
+            config.resolve.fallback = {
+                ...config.resolve.fallback,
+                fs: false,
+                path: false,
+                os: false,
+            };
+            
+            // Exclude onnxruntime-node from client bundle
+            config.externals = config.externals || [];
+            config.externals.push('onnxruntime-node');
+        }
+        
+        return config;
+    },
 };
 
 export default nextConfig;
