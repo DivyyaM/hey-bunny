@@ -7,7 +7,6 @@ import ObjectDetection from '../../components/ml/ObjectDetection';
 import KeywordExtraction from '../../components/ml/KeywordExtraction';
 import TextSummarization from '../../components/ml/TextSummarization';
 import FaceDetection from '../../components/ml/FaceDetection';
-import PoseEstimation from '../../components/ml/PoseEstimation';
 
 const rewriteCaption = (text: string, style: string) => {
   if (!text) return "";
@@ -50,7 +49,6 @@ export default function Playground() {
       <KeywordExtraction />
       <TextSummarization />
       <FaceDetection />
-      <PoseEstimation />
     </div>
   );
 } 
