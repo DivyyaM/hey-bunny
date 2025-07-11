@@ -14,13 +14,6 @@ Hey Bunny is a modern, AI-powered SaaS platform that auto-generates social media
 - **Viral Growth Engine:** Invite friends or share a referral code to earn more BunnyPoints.
 - **In-Browser ML Demos:** Try out sentiment analysis, image classification, object detection, and more—right in your browser.
 - **Modern, Responsive UI:** Built with Next.js, React, Tailwind CSS, and TypeScript. Dark mode, mobile-friendly, and recruiter-ready.
-
----
-
-## 📸 Screenshots
-
-> _Add your own screenshots here to showcase the dashboard, stepper, and BunnyPoints system!_
-
 ---
 
 ## 💡 Why This Project?
