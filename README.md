@@ -1,77 +1,104 @@
-# Hey Bunny 🐰
+# 🐰 Hey Bunny
 
-Hey Bunny is a modern, AI-powered SaaS platform that auto-generates social media captions and image prompts in bulk—instantly. Built for creators, marketers, and businesses, it leverages Google’s Gemini (GPT-4 class) API, in-browser ML demos, and a gamified, viral-ready UI to supercharge your content workflow.
-
----
-
-## ✨ What Makes Hey Bunny Special?
-
-- **Bulk AI Content Generation:** Generate 15+ captions and image prompts per click, tailored for your brand and platform.
-- **Prompt Chaining (LangChain-style):** Stepper UI lets you tune topic, tone, platform, and brand voice for each batch.
-- **Platform-Specific Formatting:** Auto-formats for Instagram, LinkedIn, Twitter, Facebook, and YouTube.
-- **Gamified BunnyPoints System:** Earn and spend points for generations, with viral referral rewards.
-- **Demo Subscription & Paywall:** Free users get 5 generations/day; "Pro" unlocks unlimited use (demo modal).
-- **Viral Growth Engine:** Invite friends or share a referral code to earn more BunnyPoints.
-- **In-Browser ML Demos:** Try out sentiment analysis, image classification, object detection, and more—right in your browser.
-- **Modern, Responsive UI:** Built with Next.js, React, Tailwind CSS, and TypeScript. Dark mode, mobile-friendly, and recruiter-ready.
----
-
-## 💡 Why This Project?
-
-Hey Bunny is designed to:
-- **Showcase full-stack AI/ML SaaS product thinking** (even as a frontend-only demo)
-- **Demonstrate prompt engineering, workflow design, and gamification**
-- **Highlight viral growth, paywall, and platform-specific formatting**
-- **Serve as a portfolio piece or SaaS MVP foundation**
+**AI-Powered Social Media Caption & Image Prompt Generator — Built for Creators, Marketers & Growth Teams**
 
 ---
 
-## 🛠️ Tech Stack
+## 🚀 Overview
+Hey Bunny is a lightweight, scalable SaaS MVP that automates high-quality social media content generation at scale. It combines Google’s Gemini API (GPT-4-class) with a gamified UX, platform-aware formatting, and prompt-chaining workflows — making it the ideal content copilot for modern creators and growth marketers.
 
-- **Next.js 14** (App Router, React 18)
-- **TypeScript**
-- **Tailwind CSS**
-- **Gemini API (Google’s GPT-4 competitor)**
-- **TensorFlow.js** (for in-browser ML demos)
-- **LocalStorage** (for demo data, gamification, and paywall)
+Built entirely in-browser using cutting-edge front-end tools, Hey Bunny delivers instant value with zero backend, proving that great AI products don't have to be heavy to be powerful.
 
 ---
 
-## 🚀 Getting Started
+## 🧠 What Sets It Apart
 
-1. **Clone the repo:**
-   ```sh
-   git clone <your-repo-url>
-   cd hey-bunny
-   ```
-2. **Install dependencies:**
-   ```sh
-   npm install
-   ```
-3. **Start the app:**
-   ```sh
-   cd hey-bunny
-   npm run dev
-   ```
-4. **Open in your browser:**
-   [http://localhost:3000](http://localhost:3000)
-5. **Enter your Gemini API key** in the Bulk Generator when prompted (get one from Google AI Studio).
+- ⚡ **Bulk Generation Engine**
+  Instantly create 15+ platform-specific captions and image prompts with a single click — optimized by topic, tone, and brand voice.
 
----
+- 🔗 **LangChain-Style Prompt Chaining**
+  A stepper-based UI enables fine-tuned content generation using a multi-step workflow for higher-quality results.
 
-## 🔌 How to Extend (Backend, Multi-User, B2B)
+- 📱 **Platform-Specific Output**
+  Automatically formats content for Instagram, LinkedIn, X (Twitter), YouTube & Facebook — eliminating post-editing.
 
-- **Backend:** Add a Node.js/Express or Next.js API backend for real-time, multi-user post history.
-- **Database:** Use MongoDB or PostgreSQL for storing user data, post history, and analytics.
-- **Auth:** Integrate Clerk/Auth0 for authentication and multi-tenant (B2B) support.
-- **Payments:** Connect Stripe or LemonSqueezy for real subscription tiers.
-- **Analytics:** Add product analytics and admin dashboards.
+- 🎮 **Viral-Ready BunnyPoints System**
+  A gamified system allows users to earn and spend points for generations. Referral bonuses and sharing unlock more usage, powering viral growth.
+
+- 🔐 **Demo Limits & Paywall Logic**
+  Free-tier users get 5 daily generations. “Pro” tier unlocks unlimited usage (toggleable in demo). Ready for Stripe/LemonSqueezy integration.
+
+- 🧪 **In-Browser AI Demos**
+  Includes live ML demos (sentiment analysis, object detection, image classification) via TensorFlow.js — no backend required.
 
 ---
 
-## 🙌 Credits
+## 💡 Why This Exists
+Hey Bunny was created as a proof-of-concept for:
 
-- Built by Divya — 
+- ⚙️ Full-stack SaaS thinking (even as a frontend-only MVP)
+- 🤖 Applied GenAI + prompt engineering
+- 🎯 Gamified growth mechanics
+- 💻 Zero-backend deployable products
+- 🧪 ML in the browser (TensorFlow.js)
+- 🚪 Foundation for future B2B AI tools
+
+This project showcases how to build lean, viral, AI-first tools — ideal for solopreneurs, creators, and early-stage founders.
+
 ---
 
-**Ready to impress recruiters and launch your SaaS MVP? Fork, star, and make it your own!**
+## 🛠 Tech Stack
+| Layer      | Tech                                 |
+|------------|--------------------------------------|
+| Frontend   | Next.js 14 (App Router), React 18    |
+| Styling    | Tailwind CSS                         |
+| Language   | TypeScript                           |
+| AI/ML      | Gemini API (Google), TensorFlow.js   |
+| Storage    | LocalStorage (gamification, demo history) |
+
+---
+
+## 🧪 Try It Locally
+```bash
+git clone <your-repo-url>
+cd hey-bunny
+npm install
+npm run dev
+```
+Then open [http://localhost:3000](http://localhost:3000) in your browser.
+Enter your Gemini API key in the Bulk Generator modal. (Get one from Google AI Studio).
+
+---
+
+## 🧱 Extend It
+Ready to scale? Here’s how to turn Hey Bunny into a full SaaS product:
+
+| Functionality      | Tech Suggestion                |
+|--------------------|-------------------------------|
+| User Auth          | Clerk, Auth0                  |
+| Database           | PostgreSQL, MongoDB           |
+| API Backend        | Next.js API routes, Express.js |
+| Payments           | Stripe, LemonSqueezy           |
+| Analytics          | PostHog, Plausible            |
+| Multi-Tenant SaaS  | Workspace model               |
+| Hosting            | Vercel                        |
+
+---
+
+## 🧑‍💻 About the Creator
+Hey Bunny is designed and built by **Divya Meena**, a product-minded developer passionate about:
+
+- AI/ML product development
+- UX-focused engineering
+- Gamification & growth mechanics
+- Building MVPs with real-world use cases
+
+> "I wanted to create something that was fast, fun, and founder-friendly — a zero-backend AI SaaS demo that feels like a real product, not a prototype."
+
+---
+
+## ⭐ Use It. Fork It. Grow It.
+- [LinkedIn](https://linkedin.com/in/divyameena)
+- [GitHub](https://github.com/DivyyaM)
+
+Looking to collaborate, hire, or invest in builders who ship fast and think in products? Let’s connect.
