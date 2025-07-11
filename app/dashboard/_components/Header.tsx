@@ -62,7 +62,7 @@ function Header() {
         <h2 className='bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 p-1 rounded-full text-sm text-white px-2'>
           🐰 Need help? Bunny’s got your back! 🌟
         </h2>
-        <UserButton appearance={{baseTheme:dark}} />
+      <UserButton appearance={{baseTheme:dark}} />
       </div>
       {showReferral && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
