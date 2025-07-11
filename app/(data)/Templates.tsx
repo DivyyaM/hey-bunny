@@ -242,5 +242,6 @@ export default [
         desc: 'Generate 15+ social media captions and image prompts per click using Gemini AI. Boost your content productivity instantly!',
         icon: '/assets/carrot.png', // You can change this to a more relevant icon if available
         category: 'Social Media',
+        aiPrompt: '',
     }
 ];
