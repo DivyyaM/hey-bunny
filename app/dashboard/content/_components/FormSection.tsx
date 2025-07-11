@@ -68,7 +68,7 @@ function FormSection({ selectedTemplate,userFormInput,loading }: PROPS) {
     }
 
     return (
-        <div className='p-5 text-white shadow-md border border-gray-600 rounded-lg bg-[#1e1e1f] '>
+        <div className='p-5 text-white shadow-md border border-gray-600 rounded-lg bg-[#18181b] '>
             {/* @ts-ignore */}
             <Image src={selectedTemplate?.icon}
                 alt='icon' width={70} height={70} />

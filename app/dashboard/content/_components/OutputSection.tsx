@@ -18,7 +18,7 @@ function OutputSection({aiOutput}:props) {
   };
 
   return (
-    <div className='bg-black text-white shadow-lg border border-gray-600 rounded-lg'>
+    <div className='bg-[#18181b] text-white shadow-lg border border-gray-600 rounded-lg'>
       <div className='flex justify-between items-center p-5'>
         <h2 className='font-medium text-lg'>Your Result</h2>
         {aiOutput && (

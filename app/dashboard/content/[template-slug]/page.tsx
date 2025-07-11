@@ -114,7 +114,7 @@ function CreateNewContent(props: PROPS) {
         isPost == 'post-generator' ? (
             <PostGenerator />
         ) : (
-            <div className='p-5'>
+            <div className='p-5 bg-black min-h-screen'>
                 <Link href={"/dashboard"}>
                     <Button> <ArrowLeft /> Back</Button>
                 </Link>
