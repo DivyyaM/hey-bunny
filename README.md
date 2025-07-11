@@ -78,9 +78,7 @@ Hey Bunny is designed to:
 
 ## 🙌 Credits
 
-- Built by [Your Name] — [your-website.com]
-- Powered by Gemini (Google AI)
-
+- Built by Divya — 
 ---
 
 **Ready to impress recruiters and launch your SaaS MVP? Fork, star, and make it your own!**
