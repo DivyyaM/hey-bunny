@@ -1,6 +1,6 @@
 "use client";
 
-import cn from "@/app/lib/cn";
+import { cn } from "@/lib/utils";
 
 /**
  * @name Shine Border

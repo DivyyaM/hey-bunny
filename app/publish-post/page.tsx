@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { AnimatePresence, motion } from 'framer-motion'
-import { logAnalyticsEvent } from '@/utils/db';
 
 interface Message {
   type: 'success' | 'error'
@@ -43,15 +42,6 @@ export default function PublishPost() {
 
       if (data.id) {
         setMessage({ type: 'success', text: 'Post published successfully!' })
-        // Log analytics event for post publishing
-        await logAnalyticsEvent({
-          eventType: 'post_published',
-          metadata: {
-            caption,
-            url,
-            fbPostId: data.id,
-          },
-        });
       } else {
         setMessage({ type: 'error', text: `Error: ${data.error.message || 'Unable to publish post.'}` })
       }
@@ -88,16 +78,6 @@ export default function PublishPost() {
 
       if (data.id) {
         setMessage({ type: 'success', text: 'Post scheduled successfully!' })
-        // Log analytics event for post scheduling
-        await logAnalyticsEvent({
-          eventType: 'post_scheduled',
-          metadata: {
-            caption,
-            url,
-            fbPostId: data.id,
-            scheduledDate,
-          },
-        });
       } else {
         setMessage({ type: 'error', text: `Error: ${data.error.message || 'Unable to schedule post.'}` })
       }

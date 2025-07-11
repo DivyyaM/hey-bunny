@@ -4,8 +4,6 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import React, { useEffect } from 'react'
-// import UsageTrack from './UsageTrack'
-// import SparklesText  from '@/components/ui/magicui/SparklesText'; // Import SparklesText
 
 function SideNav() {
 
@@ -29,18 +27,13 @@ function SideNav() {
             name:'Setting',
             icon:Settings,
             path:'/dashboard/settings'
-        },
-        {
-            name:'Analytics',
-            icon:Home, // You can swap for a chart icon if you have one
-            path:'/dashboard/analytics'
-        },
-
+        }
     ]
 
     const path=usePathname();
     useEffect(()=>{
-        console.log(path)
+        // Log current path for navigation debugging (optional, remove if not needed)
+        // console.log(path)
     },[])
 
 return (

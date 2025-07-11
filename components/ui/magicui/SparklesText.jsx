@@ -1,7 +1,7 @@
 "use client"
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import cn from "@/app/lib/cn"
+import { cn } from "@/lib/utils"
 
 const SparklesText = ({
   text,

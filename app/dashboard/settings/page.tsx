@@ -6,7 +6,7 @@ import { dark } from '@clerk/themes'
 
 function Settings() {
   return (
-    <div className='flex items-center justify-center h-full'>
+    <div className='min-h-screen bg-[#18181b] text-white p-8'>
         <UserProfile appearance={{baseTheme : dark}}   routing="hash" />
     </div>
   )

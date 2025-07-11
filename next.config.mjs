@@ -16,6 +16,7 @@ const nextConfig = {
                 fs: false,
                 path: false,
                 os: false,
+                onnxruntime: false,
             };
             
             // Exclude onnxruntime-node from client bundle

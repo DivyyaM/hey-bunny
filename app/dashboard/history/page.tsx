@@ -33,33 +33,34 @@ async function History() {
         return template;
     }
   return (
-    <div className='m-5 p-5  rounded-lg bg-black'>
-        <h2 className='font-bold text-5xl text-white '>History</h2>
-        <p className='text-gray-400'>Search your previously generate AI content</p>
-        <div className='grid grid-cols-7 font-bold bg-secondary mt-5 py-3 px-3'>
-            <h2 className='col-span-2'>TEMPLATE</h2>
-            <h2 className='col-span-2'>AI RESP</h2>
-            <h2>DATE</h2>
-            <h2>WORDS</h2>
-            <h2>COPY</h2>
+    <div className='min-h-screen bg-[#18181b] flex flex-col items-center justify-start'>
+      <div className='mx-auto max-w-6xl w-full mt-10 p-6 rounded-2xl bg-[#23233a] shadow-lg border border-[#23233a]'>
+        <h2 className='font-bold text-5xl text-white mb-2'>History</h2>
+        <p className='text-gray-400 mb-6'>Search your previously generate AI content</p>
+        <div className='grid grid-cols-7 font-bold bg-[#23233a] py-3 px-3 rounded-lg'>
+          <h2 className='col-span-2'>TEMPLATE</h2>
+          <h2 className='col-span-2'>AI RESP</h2>
+          <h2>DATE</h2>
+          <h2>WORDS</h2>
+          <h2>COPY</h2>
         </div>
-        {HistoryList.map((item:HISTORY,index:number)=>(
-            <>
-            <div className='grid grid-cols-7 my-5 py-3 px-3'>
-            <h2 className='col-span-2 flex gap-2 items-center text-white text-2xl'>
+        <div className='divide-y divide-[#23233a]'>
+          {HistoryList.map((item:HISTORY,index:number)=>(
+            <div key={item.id as any} className='grid grid-cols-7 py-5 px-3 hover:bg-[#282846] transition rounded-lg'>
+              <h2 className='col-span-2 flex gap-2 items-center text-white text-2xl'>
                 <Image src={GetTemplateName(item?.templateSlug)?.icon} width={25} height={25} alt='icon' />
                 {GetTemplateName(item.templateSlug)?.name}
-            </h2>
-            <h2 className='col-span-2 line-clamp-3 mr-3 text-white'>{item?.aiResponse}</h2>
-            <h2 className=' text-white'>{item.createdAt}</h2>
-            <h2 className=' text-white'>{item?.aiResponse.length}</h2>
-            <h2>
-              <CopyButton aiResponse={item.aiResponse} />
-            </h2>
+              </h2>
+              <h2 className='col-span-2 line-clamp-3 mr-3 text-white'>{item?.aiResponse}</h2>
+              <h2 className='text-white'>{item.createdAt}</h2>
+              <h2 className='text-white'>{item?.aiResponse.length}</h2>
+              <h2>
+                <CopyButton aiResponse={item.aiResponse} />
+              </h2>
+            </div>
+          ))}
         </div>
-        <hr/>
-            </>
-        ))}
+      </div>
     </div>
   )
 }

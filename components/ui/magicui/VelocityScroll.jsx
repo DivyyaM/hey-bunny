@@ -11,7 +11,7 @@ import {
   useVelocity,
 } from "framer-motion";
 
-import cn from "@/app/lib/cn";
+import { cn } from "@/lib/utils";
 
 export const wrap = (min, max, v) => {
   const rangeSize = max - min;

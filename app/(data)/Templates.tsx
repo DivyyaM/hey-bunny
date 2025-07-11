@@ -235,5 +235,11 @@ export default [
                 required: true
             },
         ]
+    },
+    {
+        name: 'Bulk Caption & Image Prompt Generator',
+        slug: 'bulk-caption-generator',
+        desc: 'Generate 15+ social media captions and image prompts per click using Gemini AI. Boost your content productivity instantly!',
+        icon: '/assets/carrot.png', // You can change this to a more relevant icon if available
     }
 ];

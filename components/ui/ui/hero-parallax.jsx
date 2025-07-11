@@ -3,7 +3,7 @@ import React from "react";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
-import { customLoader } from "../../app/lib/imageLoader";
+const customLoader = ({ src }) => src;
 import heroImage from "../../assets/hero-bunny.png";
 
 export const HeroParallax = ({
